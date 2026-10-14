@@ -26,7 +26,7 @@
   .call.fail { background:var(--err); color:#2b0505; box-shadow:0 0 0 10px rgba(255,107,107,.2); }
   .call.dim { opacity:.35; box-shadow:none; }
   #status { min-height:1.6em; font-size:clamp(18px,3vw,26px); font-weight:600; }
-  #gear { position:fixed; right:0; bottom:0; width:72px; height:72px; background:none; border:0; opacity:0; }
+  #gear { position:fixed; right:0; top:0; width:110px; height:110px; background:none; border:0; opacity:0; z-index:5; }
   dialog { border:0; border-radius:16px; padding:24px; width:min(92vw,480px); background:#fff; color:#10202f; }
   dialog label { display:block; font-weight:700; margin:12px 0 6px; }
   dialog input { width:100%; padding:12px; font-size:16px; border:1px solid #b9c4d2; border-radius:8px; user-select:text; }
@@ -39,7 +39,7 @@
 </head>
 <body>
 <main>
-  <h1>도움이 필요하신가요?</h1>
+  <h1 id="title">도움이 필요하신가요?</h1>
   <p class="guide">문의 종류를 누르면 직원이 음성으로 응대합니다.</p>
   <div class="btns">
     <button class="call" type="button" data-type="충전 문의">충전 문의</button>
@@ -128,20 +128,22 @@
     });
   });
 
-  // 설정: 화면 오른쪽 아래 모서리를 5번 연속 탭
+  // 설정: 제목 글자 또는 화면 오른쪽 위 모서리를 5번 연속 탭
   var taps = 0, tapTimer = null;
-  document.getElementById('gear').addEventListener('click', function () {
+  function openSetup() {
+    hookEl.value = load('hook');
+    storeEl.value = load('store');
+    setupMsg.textContent = '';
+    if (setup.showModal) { setup.showModal(); } else { setup.setAttribute('open', ''); }
+  }
+  function countTap() {
     taps += 1;
     clearTimeout(tapTimer);
-    tapTimer = setTimeout(function () { taps = 0; }, 2000);
-    if (taps >= 5) {
-      taps = 0;
-      hookEl.value = load('hook');
-      storeEl.value = load('store');
-      setupMsg.textContent = '';
-      if (setup.showModal) { setup.showModal(); } else { setup.setAttribute('open', ''); }
-    }
-  });
+    tapTimer = setTimeout(function () { taps = 0; }, 2500);
+    if (taps >= 5) { taps = 0; openSetup(); }
+  }
+  document.getElementById('gear').addEventListener('click', countTap);
+  document.getElementById('title').addEventListener('click', countTap);
 
   function persist() {
     var ok = save('hook', hookEl.value.trim()) && save('store', storeEl.value.trim());
