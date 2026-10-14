@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>직원 호출</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1b2d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root { --bg:#0f1b2d; --ink:#f3f6fb; --sub:#9db0c9; --call:#ffb21f; --ok:#3ccf91; --err:#ff6b6b; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body { height:100%; margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif; }
+  main { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:24px; text-align:center; }
+  h1 { margin:0; font-size:clamp(28px,5vw,48px); font-weight:800; letter-spacing:-0.02em; }
+  p.guide { margin:0; color:var(--sub); font-size:clamp(16px,2.6vw,22px); }
+  .btns { display:flex; gap:20px; width:min(100%,1000px); justify-content:center; }
+  .call { flex:1; min-height:min(34vh,240px); border-radius:28px; border:0; background:var(--call);
+    color:#2a1a00; font:inherit; font-size:clamp(26px,4.6vw,44px); font-weight:800; cursor:pointer;
+    box-shadow:0 0 0 10px rgba(255,178,31,.16); transition:transform .12s, box-shadow .3s, background .3s, opacity .3s; }
+  .call:active { transform:scale(.97); }
+  .call:disabled { cursor:default; }
+  .call.sent { background:var(--ok); color:#06261a; box-shadow:0 0 0 10px rgba(60,207,145,.2); }
+  .call.fail { background:var(--err); color:#2b0505; box-shadow:0 0 0 10px rgba(255,107,107,.2); }
+  .call.dim { opacity:.35; box-shadow:none; }
+  #status { min-height:1.6em; font-size:clamp(18px,3vw,26px); font-weight:600; }
+  #gear { position:fixed; right:0; bottom:0; width:72px; height:72px; background:none; border:0; opacity:0; }
+  dialog { border:0; border-radius:16px; padding:24px; width:min(92vw,480px); background:#fff; color:#10202f; }
+  dialog label { display:block; font-weight:700; margin:12px 0 6px; }
+  dialog input { width:100%; padding:12px; font-size:16px; border:1px solid #b9c4d2; border-radius:8px; user-select:text; }
+  dialog .row { display:flex; gap:10px; margin-top:18px; }
+  dialog button { flex:1; padding:12px; font-size:16px; font-weight:700; border-radius:8px; border:0; cursor:pointer; }
+  .save { background:#10202f; color:#fff; } .test { background:#e5ebf3; color:#10202f; }
+  @media (max-width:600px){ .btns{flex-direction:column} .call{min-height:110px} }
+  @media (prefers-reduced-motion:reduce){ .call{transition:none} }
+</style>
+</head>
+<body>
+<main>
+  <h1>도움이 필요하신가요?</h1>
+  <p class="guide">문의 종류를 누르면 직원이 음성으로 응대합니다.</p>
+  <div class="btns">
+    <button class="call" type="button" data-type="충전 문의">충전 문의</button>
+    <button class="call" type="button" data-type="상품 문의">상품 문의</button>
+    <button class="call" type="button" data-type="기타 문의">기타 문의</button>
+  </div>
+  <div id="status" role="status" aria-live="polite"></div>
+</main>
+<button id="gear" type="button" aria-label="설정"></button>
+
+<dialog id="setup">
+  <h2 style="margin:0 0 4px">설정</h2>
+  <label for="hook">디스코드 웹훅 주소</label>
+  <input id="hook" type="url" placeholder="https://discord.com/api/webhooks/...">
+  <label for="store">매장 이름</label>
+  <input id="store" type="text" placeholder="A매장">
+  <div class="row">
+    <button class="test" id="testBtn" type="button">테스트 호출</button>
+    <button class="save" id="saveBtn" type="button">저장</button>
+  </div>
+  <p id="setupMsg" style="margin:12px 0 0;font-size:14px;color:#51657d"></p>
+</dialog>
+
+<script>
+(function () {
+  var COOLDOWN_SEC = 15;
+  var btns = Array.prototype.slice.call(document.querySelectorAll('.call'));
+  var statusEl = document.getElementById('status');
+  var setup = document.getElementById('setup');
+  var hookEl = document.getElementById('hook');
+  var storeEl = document.getElementById('store');
+  var setupMsg = document.getElementById('setupMsg');
+  var busy = false;
+
+  function load(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function save(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+  function cfg() { return { hook: load('hook'), store: load('store') || 'A매장' }; }
+
+  function send(type, testMode) {
+    var c = cfg();
+    if (!c.hook) { return Promise.reject(new Error('NO_HOOK')); }
+    var t = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    var text = testMode
+      ? '🧪 [테스트] ' + c.store + ' 호출 버튼 테스트 (' + t + ')'
+      : '@here 🔔 ' + c.store + ' [' + type + '] 호출 (' + t + ') - 음성채널로 응대해 주세요';
+    return fetch(c.hook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: text, allowed_mentions: { parse: ['everyone'] } })
+    }).then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } });
+  }
+
+  function reset() {
+    btns.forEach(function (b) { b.disabled = false; b.className = 'call'; b.textContent = b.getAttribute('data-type'); });
+    statusEl.textContent = '';
+    busy = false;
+  }
+
+  function cooldown() {
+    var left = COOLDOWN_SEC;
+    var timer = setInterval(function () {
+      left -= 1;
+      if (left <= 0) { clearInterval(timer); reset(); }
+    }, 1000);
+  }
+
+  btns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (busy) { return; }
+      busy = true;
+      btns.forEach(function (b) { b.disabled = true; if (b !== btn) { b.classList.add('dim'); } });
+      statusEl.textContent = '호출 중...';
+      send(btn.getAttribute('data-type'), false).then(function () {
+        btn.className = 'call sent';
+        btn.textContent = '호출 완료';
+        statusEl.textContent = '직원이 곧 응답합니다. 잠시만 기다려 주세요.';
+        cooldown();
+      }).catch(function (e) {
+        btn.className = 'call fail';
+        btn.textContent = '호출 실패';
+        statusEl.textContent = e.message === 'NO_HOOK'
+          ? '설정이 필요합니다. 관리자에게 문의해 주세요.'
+          : '연결에 실패했습니다. 다시 눌러 주세요.';
+        setTimeout(reset, 3000);
+      });
+    });
+  });
+
+  // 설정: 화면 오른쪽 아래 모서리를 5번 연속 탭
+  var taps = 0, tapTimer = null;
+  document.getElementById('gear').addEventListener('click', function () {
+    taps += 1;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function () { taps = 0; }, 2000);
+    if (taps >= 5) {
+      taps = 0;
+      hookEl.value = load('hook');
+      storeEl.value = load('store');
+      setupMsg.textContent = '';
+      if (setup.showModal) { setup.showModal(); } else { setup.setAttribute('open', ''); }
+    }
+  });
+
+  function persist() {
+    var ok = save('hook', hookEl.value.trim()) && save('store', storeEl.value.trim());
+    if (!ok) { setupMsg.textContent = '저장에 실패했습니다. 브라우저 저장소 설정을 확인하세요.'; }
+    return ok;
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    if (persist()) { if (setup.close) { setup.close(); } else { setup.removeAttribute('open'); } }
+  });
+
+  document.getElementById('testBtn').addEventListener('click', function () {
+    if (!persist()) { return; }
+    setupMsg.textContent = '전송 중...';
+    send('', true).then(function () {
+      setupMsg.textContent = '테스트 성공. 디스코드 호출 채널을 확인하세요.';
+    }).catch(function () {
+      setupMsg.textContent = '실패했습니다. 웹훅 주소를 다시 확인하세요.';
+    });
+  });
+
+  if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
+})();
+</script>
+</body>
+</html>
