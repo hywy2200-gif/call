@@ -13,7 +13,7 @@
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
   html,body { height:100%; margin:0; background:var(--bg); color:var(--ink);
     font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif; }
-  main { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:24px; text-align:center; }
+  main { height:100%; padding-bottom:84px !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:24px; text-align:center; }
   h1 { margin:0; font-size:clamp(28px,5vw,48px); font-weight:800; letter-spacing:-0.02em; }
   p.guide { margin:0; color:var(--sub); font-size:clamp(16px,2.6vw,22px); }
   .btns { display:flex; gap:20px; width:min(100%,1000px); justify-content:center; }
@@ -26,6 +26,8 @@
   .call.fail { background:var(--err); color:#2b0505; box-shadow:0 0 0 10px rgba(255,107,107,.2); }
   .call.dim { opacity:.35; box-shadow:none; }
   #status { min-height:1.6em; font-size:clamp(18px,3vw,26px); font-weight:600; }
+  #emergency { position:fixed; left:0; right:0; bottom:0; padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px)); text-align:center; color:var(--sub); font-size:clamp(18px,2.8vw,26px); background:rgba(255,255,255,.05); }
+  #emergency a { color:var(--ink); font-weight:800; text-decoration:none; margin-left:8px; letter-spacing:.02em; }
   #gear { position:fixed; right:0; top:0; width:110px; height:110px; background:none; border:0; opacity:0; z-index:5; }
   dialog { border:0; border-radius:16px; padding:24px; width:min(92vw,480px); background:#fff; color:#10202f; }
   dialog label { display:block; font-weight:700; margin:12px 0 6px; }
@@ -48,6 +50,7 @@
   </div>
   <div id="status" role="status" aria-live="polite"></div>
 </main>
+<div id="emergency">긴급 전화번호 <a href="tel:0559030516">055-903-0516</a></div>
 <button id="gear" type="button" aria-label="설정"></button>
 
 <dialog id="setup">
