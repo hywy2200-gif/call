@@ -1,4 +1,4 @@
-var C = 'call-v5';
+var C = 'call-v7';
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(C).then(function (c) { return c.addAll(['./index.html', './manifest.json']); }));
   self.skipWaiting();

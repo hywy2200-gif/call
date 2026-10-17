@@ -13,11 +13,11 @@
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
   html,body { height:100%; margin:0; background:var(--bg); color:var(--ink);
     font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif; }
-  main { height:100%; padding-bottom:84px !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:24px; text-align:center; }
+  main { height:100%; padding-bottom:150px !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:24px; text-align:center; }
   h1 { margin:0; font-size:clamp(28px,5vw,48px); font-weight:800; letter-spacing:-0.02em; }
   p.guide { margin:0; color:var(--sub); font-size:clamp(16px,2.6vw,22px); }
   .btns { display:flex; gap:20px; width:min(100%,1000px); justify-content:center; }
-  .call { flex:1; min-height:min(34vh,240px); border-radius:28px; border:0; background:var(--call);
+  .call { flex:1; min-height:min(30vh,220px); border-radius:28px; border:0; background:var(--call);
     color:#2a1a00; font:inherit; font-size:clamp(26px,4.6vw,44px); font-weight:800; cursor:pointer;
     box-shadow:0 0 0 10px rgba(255,178,31,.16); transition:transform .12s, box-shadow .3s, background .3s, opacity .3s; }
   .call:active { transform:scale(.97); }
@@ -26,7 +26,10 @@
   .call.fail { background:var(--err); color:#2b0505; box-shadow:0 0 0 10px rgba(255,107,107,.2); }
   .call.dim { opacity:.35; box-shadow:none; }
   #status { min-height:1.6em; font-size:clamp(18px,3vw,26px); font-weight:600; }
-  #emergency { position:fixed; left:0; right:0; bottom:0; padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px)); text-align:center; color:var(--sub); font-size:clamp(18px,2.8vw,26px); background:rgba(255,255,255,.05); }
+  #emergency { position:fixed; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; gap:20px; padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px)); color:var(--sub); font-size:clamp(15px,2.3vw,22px); line-height:1.6; background:rgba(255,255,255,.05); }
+  #emergency .info { text-align:left; }
+  #wifiqr { width:112px; height:112px; flex:none; border-radius:8px; background:#fff; }
+  #emergency .sep { margin:0 6px; opacity:.5; }
   #emergency strong { color:var(--ink); font-weight:800; margin-left:8px; letter-spacing:.02em; }
   #gear { position:fixed; right:0; top:0; width:110px; height:110px; background:none; border:0; opacity:0; z-index:5; }
   dialog { border:0; border-radius:16px; padding:24px; width:min(92vw,480px); background:#fff; color:#10202f; }
@@ -50,7 +53,13 @@
   </div>
   <div id="status" role="status" aria-live="polite"></div>
 </main>
-<div id="emergency">긴급 전화번호 <strong>055-903-0516</strong></div>
+<div id="emergency">
+  <svg id="wifiqr" role="img" aria-label="WiFi 접속 QR코드" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges" class="segno"><path fill="#fff" d="M0 0h37v37h-37z"/><path class="qrline" stroke="#000" d="M4 4.5h7m1 0h2m1 0h2m2 0h1m2 0h3m1 0h7m-29 1h1m5 0h1m1 0h1m1 0h2m2 0h1m1 0h2m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m4 0h1m1 0h1m1 0h2m1 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h5m3 0h3m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m1 0h4m2 0h2m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m3 0h1m1 0h1m1 0h1m2 0h1m1 0h2m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h1m1 0h6m1 0h4m-21 1h1m1 0h2m1 0h3m1 0h1m2 0h4m2 0h2m2 0h1m2 0h1m1 0h2m-29 1h1m1 0h2m1 0h1m3 0h1m9 0h2m1 0h1m1 0h1m1 0h2m-24 1h4m1 0h1m1 0h2m1 0h1m1 0h2m4 0h1m1 0h4m-28 1h1m1 0h2m3 0h4m1 0h4m3 0h2m4 0h1m-26 1h1m5 0h5m1 0h1m2 0h4m4 0h4m-24 1h1m1 0h1m2 0h1m1 0h2m1 0h1m1 0h1m2 0h2m2 0h1m-22 1h2m1 0h7m1 0h1m1 0h1m1 0h2m1 0h2m2 0h6m-28 1h3m1 0h1m3 0h2m1 0h2m2 0h1m1 0h1m1 0h1m4 0h1m-23 1h2m1 0h1m4 0h2m3 0h1m1 0h4m2 0h3m1 0h1m-28 1h2m1 0h2m1 0h7m1 0h2m3 0h1m7 0h1m-29 1h1m5 0h4m5 0h2m1 0h1m3 0h3m-22 1h3m1 0h3m1 0h2m3 0h5m1 0h2m2 0h3m-28 1h2m1 0h4m3 0h3m3 0h1m1 0h6m1 0h3m-21 1h1m1 0h2m1 0h2m4 0h2m3 0h1m1 0h1m-27 1h7m1 0h2m3 0h1m3 0h1m1 0h2m1 0h1m1 0h1m2 0h1m-28 1h1m5 0h1m1 0h1m6 0h2m1 0h1m1 0h1m3 0h1m3 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m1 0h1m1 0h2m1 0h2m1 0h6m-26 1h1m1 0h3m1 0h1m1 0h2m1 0h11m1 0h1m1 0h2m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m7 0h1m3 0h1m1 0h1m2 0h1m1 0h1m-29 1h1m5 0h1m4 0h4m3 0h1m1 0h1m3 0h2m1 0h1m-28 1h7m1 0h1m2 0h1m1 0h1m2 0h1m2 0h2m2 0h1m1 0h3"/></svg>
+  <div class="info">
+    <div>WiFi <strong>intermecca</strong> <span class="sep">/</span> <strong>a123b567</strong></div>
+    <div>긴급 전화번호 <strong>055-903-0516</strong></div>
+  </div>
+</div>
 <button id="gear" type="button" aria-label="설정"></button>
 
 <dialog id="setup">
